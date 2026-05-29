@@ -153,3 +153,67 @@ def add_transaction(type, product_id, quantity, user_id):
         raise e
     finally:
         conn.close()
+# database.py (добавить в конец файла)
+
+def add_product(name: str, unit: str) -> int:
+    """Добавляет новый товар, возвращает его id."""
+    conn = get_connection()
+    try:
+        cursor = conn.execute(
+            "INSERT INTO products (name, unit) VALUES (?, ?)",
+            (name, unit)
+        )
+        product_id = cursor.lastrowid
+        # Создаём запись в stock с нулевым количеством
+        conn.execute(
+            "INSERT INTO stock (product_id, quantity) VALUES (?, 0)",
+            (product_id,)
+        )
+        conn.commit()
+        return product_id
+    except sqlite3.IntegrityError:
+        return None  # товар с таким именем уже существует
+    finally:
+        conn.close()
+
+def update_product(product_id: int, name: str, unit: str) -> bool:
+    """Обновляет название и единицу измерения товара."""
+    conn = get_connection()
+    try:
+        conn.execute(
+            "UPDATE products SET name = ?, unit = ? WHERE id = ?",
+            (name, unit, product_id)
+        )
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    finally:
+        conn.close()
+
+def delete_product(product_id: int) -> bool:
+    """Удаляет товар и связанные остатки/транзакции (каскадно)."""
+    conn = get_connection()
+    try:
+        conn.execute("DELETE FROM products WHERE id = ?", (product_id,))
+        conn.commit()
+        return True
+    except Exception:
+        return False
+    finally:
+        conn.close()
+
+def set_stock_quantity(product_id: int, new_quantity: float) -> bool:
+    """Прямая установка количества (для администратора)."""
+    conn = get_connection()
+    try:
+        conn.execute(
+            "UPDATE stock SET quantity = ? WHERE product_id = ?",
+            (new_quantity, product_id)
+        )
+        conn.commit()
+        return True
+    except Exception:
+        return False
+    finally:
+        conn.close()
