@@ -13,7 +13,6 @@ class MainMenu:
         self.root.geometry("550x450")
         self.root.resizable(False, False)
 
-        # Градиентный фон
         canvas = tk.Canvas(self.root, width=550, height=450, highlightthickness=0)
         canvas.pack(fill="both", expand=True)
         for i in range(450):
@@ -21,7 +20,7 @@ class MainMenu:
             canvas.create_line(0, i, 550, i, fill=color)
 
         frame = tk.Frame(self.root, bg='#f0f4fa')
-        frame.place(relx=0.5, rely=0.5, anchor="center", width=450, height=420)  # чуть выше, чтобы поместилась кнопка
+        frame.place(relx=0.5, rely=0.5, anchor="center", width=450, height=420)
 
         tk.Label(frame, text="Складской учёт", font=('Arial', 20, 'bold'),
                  bg='#f0f4fa', fg='#003366').pack(pady=(30, 5))
@@ -41,8 +40,8 @@ class MainMenu:
                                 width=260, height=45)
         btn_sale.pack(pady=8)
 
-        # Если пользователь admin – добавить кнопку управления товарами
-        if user.get('role') == 'admin':
+        # Исправлено: user['role'] вместо user.get('role')
+        if user['role'] == 'admin':
             btn_manage = ModernButton(btn_frame, text="⚙️  Управление товарами",
                                       command=self.open_manage_products,
                                       width=260, height=45,
